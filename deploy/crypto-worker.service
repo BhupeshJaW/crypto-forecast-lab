@@ -1,0 +1,17 @@
+# Install: sudo cp deploy/*.service /etc/systemd/system/ ; edit User/paths ; 
+#          sudo systemctl daemon-reload ; sudo systemctl enable --now crypto-worker crypto-dashboard
+[Unit]
+Description=Crypto predictor worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/opt/crypto_predictor
+ExecStart=/opt/crypto_predictor/venv/bin/python scheduler.py
+Restart=always
+RestartSec=30
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

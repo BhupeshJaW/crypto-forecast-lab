@@ -1,0 +1,13 @@
+[Unit]
+Description=Crypto predictor dashboard
+After=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/opt/crypto_predictor
+ExecStart=/opt/crypto_predictor/venv/bin/streamlit run app.py --server.address 127.0.0.1 --server.port 8501 --server.headless true
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

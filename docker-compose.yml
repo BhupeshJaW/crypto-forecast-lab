@@ -1,0 +1,44 @@
+# Start:  docker compose up -d --build        Logs: docker compose logs -f worker
+# Stop:   docker compose down                 (data survives in ./data ./models ./logs ./backups)
+services:
+  worker:
+    build: .
+    command: python scheduler.py
+    restart: unless-stopped
+    stop_grace_period: 30s
+    env_file:
+      - path: .env
+        required: false
+    volumes: &vols
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 15m
+      timeout: 30s
+      retries: 1
+      start_period: 15m
+
+  dashboard:
+    build: .
+    command: streamlit run app.py --server.address 0.0.0.0 --server.port 8501 --server.headless true
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    volumes: *vols
+    ports:
+      - "127.0.0.1:8501:8501"   # only this machine. Use an SSH tunnel to view remotely (see DEPLOY.md)
+
+  api:
+    build: .
+    command: uvicorn api:app --host 0.0.0.0 --port 8000
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    volumes: *vols
+    ports:
+      - "127.0.0.1:8000:8000"   # only this machine. Put a reverse proxy with HTTPS in front before exposing it.
