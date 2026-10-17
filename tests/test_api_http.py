@@ -45,7 +45,8 @@ def make_candles(n=400, hours_old=1, source="binance", close_only=False):
 
 def seed_populated_db():
     now = pd.Timestamp.now(tz="UTC").floor("h")
-    created = (now - pd.Timedelta(minutes=5)).isoformat()
+    # Relative to the real clock, not the floored hour: otherwise the forecast looks >1h old late in each hour.
+    created = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(minutes=5)).isoformat()
     target = (now + pd.Timedelta(hours=1)).isoformat()
     db.add_prediction(("BTCUSDT", created, target, 100.0, 100.4, 0.004, "v1", "ridge"))
     db.add_model_run((created, "BTCUSDT", "v1", "ridge", 0.003, 0.0031, None, 0.52, 1, "first model", 400))
